@@ -4,7 +4,6 @@ This tool provides a flexible `analyze_code` method that sends code snippets
 to Gemini for deeper understanding. It prioritizes authentication in this order:
 1. Google AI SDK (using GOOGLE_API_KEY)
 2. Vertex AI SDK (using GOOGLE_CLOUD_PROJECT and service account)
-3. Stubbed response (if neither is configured)
 """
 from __future__ import annotations
 
@@ -49,18 +48,10 @@ class CodeUnderstandingTool:
             LOGGER.info("Using Vertex AI SDK for Gemini (Project found).")
             return "vertex_ai"
 
-        # If ALLOW_STUB env var explicitly enabled, allow stub mode (for tests).
-        if os.getenv("ALLOW_STUB", "0") in {"1", "true", "yes"}:
-            LOGGER.warning(
-                "Gemini credentials not set, but ALLOW_STUB is enabled; using stub responses."
-            )
-            return "stub"
-
-        # In production we require valid credentials; abort early.
+        # Credentials **must** be provided; otherwise abort early.
         raise RuntimeError(
             "Gemini credentials not configured. Set GOOGLE_API_KEY for the Google AI SDK "
-            "or configure GOOGLE_CLOUD_PROJECT with a service-account for Vertex AI, "
-            "or set ALLOW_STUB=1 to allow stub responses (tests only)."
+            "or configure GOOGLE_CLOUD_PROJECT with a service-account for Vertex AI."
         )
 
     def analyze_code(self, files: List[Path]) -> Dict[str, Any]:
@@ -81,11 +72,8 @@ class CodeUnderstandingTool:
 
         if self.mode == "google_ai":
             return self._analyze_with_google_ai(content)
-        if self.mode == "vertex_ai":
-            return self._analyze_with_vertex_ai(content)
-
-        # Stub mode (tests / development only)
-        return {"gemini_summary": "Stubbed response (ALLOW_STUB enabled)."}
+        # Only other possibility is vertex_ai
+        return self._analyze_with_vertex_ai(content)
 
     def _analyze_with_google_ai(self, content: str) -> Dict[str, Any]:
         """Use the Google AI SDK (API Key)."""
