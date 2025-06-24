@@ -20,8 +20,14 @@ class CVEChecker:
     def search(self, keyword: str, max_results: int = 10) -> List[Dict[str, str]]:
         """Search NVD for CVEs containing the given keyword."""
         if not self.api_key:
-            LOGGER.debug("NVD_API_KEY not set; skipping live CVE lookup")
-            return []
+            if os.getenv("ALLOW_STUB", "0") in {"1", "true", "yes"}:
+                LOGGER.warning(
+                    "NVD_API_KEY not set, but ALLOW_STUB enabled; returning empty CVE list."
+                )
+                return []
+            raise RuntimeError(
+                "NVD_API_KEY not set. Provide a valid NVD API key to enable CVE lookups or set ALLOW_STUB=1."
+            )
 
         params = {
             "keywordSearch": keyword,
@@ -33,8 +39,10 @@ class CVEChecker:
             r.raise_for_status()
             data = r.json()
         except Exception as exc:  # pragma: no cover
-            LOGGER.error("CVE API request failed: %s", exc)
-            return []
+            if os.getenv("ALLOW_STUB", "0") in {"1", "true", "yes"}:
+                LOGGER.warning("CVE API request failed but ALLOW_STUB enabled: %s", exc)
+                return []
+            raise RuntimeError(f"CVE API request failed: {exc}")
 
         results: List[Dict[str, str]] = []
         for item in data.get("vulnerabilities", []):

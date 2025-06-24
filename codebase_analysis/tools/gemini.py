@@ -48,8 +48,20 @@ class CodeUnderstandingTool:
         if self.project and aiplatform:
             LOGGER.info("Using Vertex AI SDK for Gemini (Project found).")
             return "vertex_ai"
-        LOGGER.warning("Gemini integration not configured; using stub responses.")
-        return "stub"
+
+        # If ALLOW_STUB env var explicitly enabled, allow stub mode (for tests).
+        if os.getenv("ALLOW_STUB", "0") in {"1", "true", "yes"}:
+            LOGGER.warning(
+                "Gemini credentials not set, but ALLOW_STUB is enabled; using stub responses."
+            )
+            return "stub"
+
+        # In production we require valid credentials; abort early.
+        raise RuntimeError(
+            "Gemini credentials not configured. Set GOOGLE_API_KEY for the Google AI SDK "
+            "or configure GOOGLE_CLOUD_PROJECT with a service-account for Vertex AI, "
+            "or set ALLOW_STUB=1 to allow stub responses (tests only)."
+        )
 
     def analyze_code(self, files: List[Path]) -> Dict[str, Any]:
         """Send a batch of code files to Gemini and get high-level summary."""
@@ -68,18 +80,12 @@ class CodeUnderstandingTool:
             return {"gemini_summary": "Python files were empty; nothing to analyze."}
 
         if self.mode == "google_ai":
-            try:
-                return self._analyze_with_google_ai(content)
-            except Exception as exc:  # pragma: no cover
-                LOGGER.error("Gemini API failed: %s", exc)
-                # Fall back to stubbed response
-                return {"gemini_summary": "Gemini API error; using stub."}
+            return self._analyze_with_google_ai(content)
         if self.mode == "vertex_ai":
             return self._analyze_with_vertex_ai(content)
-        
-        return {
-            "gemini_summary": "Gemini not configured. Set GOOGLE_API_KEY (for Google AI) or GOOGLE_CLOUD_PROJECT (for Vertex AI).",
-        }
+
+        # Stub mode (tests / development only)
+        return {"gemini_summary": "Stubbed response (ALLOW_STUB enabled)."}
 
     def _analyze_with_google_ai(self, content: str) -> Dict[str, Any]:
         """Use the Google AI SDK (API Key)."""

@@ -52,9 +52,12 @@ python -m codebase_analysis.api  # serves on http://localhost:8000
 
 | Variable | Purpose | Default |
 | -------- | ------- | ------- |
+| `GOOGLE_API_KEY` **or** `GOOGLE_CLOUD_PROJECT` | Required for live Gemini 2.5 Pro calls | *(none)* |
+| `NVD_API_KEY` | Required for CVE look-ups against NVD | *(none)* |
 | `REPORT_DIR` | Where generated files are saved | `./reports` |
 | `RATELIMIT_STORAGE_URL` | Redis/Memcached DSN for Flask-Limiter | `memory://` |
 | `LOG_FORMAT` | `rich` (colour) or `json` | `rich` |
+| `ALLOW_STUB` | **Tests only.** Set to `1` to bypass external services | `0` |
 
 The API exposes **`/healthz`** for load-balancer readiness probes.
 
