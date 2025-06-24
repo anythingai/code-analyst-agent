@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Codebase Analyzer</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="window-container">
+    <div class="title-bar">
+      <div class="dots-container">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+    </div>
+    <main>
+      <h1>Code Analyst Agent</h1>
+      <form id="analyze-form">
+        <div class="input-row">
+          <input type="text" id="repo-url" name="repo_url" placeholder="Enter a GitHub URL or local path..." required />
+          <button type="submit">Analyze</button>
+        </div>
+      </form>
+
+      <div id="status" class="hidden">
+        <div class="loader"></div>
+        <p>Analyzing... this may take a moment.</p>
+      </div>
+
+      <!-- Summary boxes will be injected here -->
+      <div id="summary-grid" class="hidden"></div>
+
+      <div id="results-container" class="hidden"></div>
+    </main>
+  </div>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" integrity="sha512-8FKQB0hN95Rq36OeXn6gW9asimcvWYLq3DywSHv0Iz6smRP6ItKi3AyF8XIl0TNTr+VhkJXsD5bPwSTAKF/Zjw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="/static/app.js"></script>
+  <script>if (window.hljs) { hljs.highlightAll(); }</script>
+</body>
+</html> 

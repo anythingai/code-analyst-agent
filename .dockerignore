@@ -1,0 +1,13 @@
+# Ignore files not needed in the final image
+.git
+__pycache__
+*.py[cod]
+*.pytest_cache
+*.coverage
+.coverage.*
+htmlcov
+node_modules
+reports
+*.log
+
+.env 

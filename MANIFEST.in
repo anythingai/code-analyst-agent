@@ -1,0 +1,2 @@
+recursive-include codebase_analysis/templates *.html
+recursive-include codebase_analysis/static *.* 
