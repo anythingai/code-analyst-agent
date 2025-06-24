@@ -23,7 +23,7 @@ htmlcov/
 
 # Environment files
 .env
-.env.*
+.env.local
 
 # IDEs / editors
 .vscode/
