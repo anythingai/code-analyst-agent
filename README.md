@@ -59,6 +59,7 @@ python -m codebase_analysis.api  # serves on http://localhost:8000
 The API exposes **`/healthz`** for load-balancer readiness probes.
 
 ### Docker
+
 The multi-stage image already bundles `fpdf2` & `python-docx`, so PDF/DOCX export works without system libraries.
 
 ```bash
@@ -66,9 +67,7 @@ docker build -t codebase-analysis:latest .
 docker run -p 8000:8000 codebase-analysis:latest
 ```
 
----
-
-5. (Optional) Build and run the container:
+ Build and run the container:
 
 ```bash
 docker build -t codebase-analysis:latest .
@@ -88,6 +87,4 @@ codebase_analysis/
   api.py         # Flask wrapper
 ```
 
-## Contributing
-
-Pull requests are welcome! Please run `pytest` and `ruff` before submitting.
+---
