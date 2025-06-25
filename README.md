@@ -26,7 +26,7 @@ A **production-ready** multi-agent system powered by **Gemini 2.5 Pro** for comp
 ✅ **F8**: CLI & Flask API interfaces  
 ✅ **F9**: Comprehensive logging & testing  
 
-## ��️ Architecture
+## 🤖 Architecture
 
 ```mermaid
 graph TB
