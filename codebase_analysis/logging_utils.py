@@ -23,10 +23,10 @@ def setup_logging(level: str | int | None = None) -> None:
 
     if log_format == "json":
         try:
-            from pythonjsonlogger import jsonlogger  # type: ignore
+            from pythonjsonlogger.json import JsonFormatter
 
             handler: logging.Handler = logging.StreamHandler()
-            formatter = jsonlogger.JsonFormatter("%(asctime)s %(levelname)s %(name)s %(message)s")
+            formatter = JsonFormatter("%(asctime)s %(levelname)s %(name)s %(message)s")
             handler.setFormatter(formatter)
             logging.basicConfig(level=level, handlers=[handler])
         except ImportError:  # pragma: no cover – optional dependency

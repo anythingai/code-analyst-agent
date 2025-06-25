@@ -37,28 +37,31 @@ class BigQueryTool:
 
     def query_vulnerability_trends(self, packages: list[str]) -> dict[str, Any]:
         """Query BigQuery for vulnerability trends in specified packages."""
-        if not self.client:
+        if not self.client or bigquery is None:
             return {"error": "BigQuery client not available", "trends": [], "total_packages": 0}
 
         if not packages:
             return {"trends": [], "total_packages": 0}
 
         try:
-            # Example query - in production this would be a real vulnerability database
-            package_list = "', '".join(packages)
-            query = f"""
-            SELECT
-                package_name,
-                COUNT(*) as vulnerability_count,
-                AVG(severity_score) as avg_severity,
-                MAX(discovery_date) as latest_vuln_date
-            FROM `{self.project}.{self.dataset}.vulnerabilities`
-            WHERE package_name IN ('{package_list}')
-            GROUP BY package_name
-            ORDER BY vulnerability_count DESC
+            # Parameterized query to prevent SQL injection
+            query = """
+                SELECT
+                    package_name,
+                    COUNT(*) as vulnerability_count,
+                    AVG(severity_score) as avg_severity,
+                    MAX(discovery_date) as latest_vuln_date
+                FROM `{self.project}.{self.dataset}.vulnerabilities`
+                WHERE package_name IN UNNEST(@packages)
+                GROUP BY package_name
+                ORDER BY vulnerability_count DESC
             """
-
-            query_job = self.client.query(query)
+            job_config = bigquery.QueryJobConfig(
+                query_parameters=[
+                    bigquery.ArrayQueryParameter("packages", "STRING", packages)
+                ]
+            )
+            query_job = self.client.query(query, job_config=job_config)
             results = []
 
             for row in query_job:
@@ -94,32 +97,36 @@ class BigQueryTool:
 
     def analyze_dependency_risks(self, dependencies: list[str]) -> dict[str, Any]:
         """Analyze dependency risk patterns using BigQuery."""
-        if not self.client:
+        if not self.client or bigquery is None:
             return {"error": "BigQuery client not available", "risk_analysis": [], "total_dependencies": 0}
 
         if not dependencies:
             return {"risk_analysis": [], "total_dependencies": 0}
 
         try:
-            dep_list = "', '".join(dependencies)
-            query = f"""
-            SELECT
-                d.dependency_name,
-                d.version,
-                COUNT(v.vulnerability_id) as vuln_count,
-                AVG(v.cvss_score) as avg_cvss,
-                MAX(v.publication_date) as latest_vuln,
-                d.download_count_last_month,
-                d.maintenance_score
-            FROM `{self.project}.{self.dataset}.dependencies` d
-            LEFT JOIN `{self.project}.{self.dataset}.vulnerabilities` v
-                ON d.dependency_name = v.package_name
-            WHERE d.dependency_name IN ('{dep_list}')
-            GROUP BY d.dependency_name, d.version, d.download_count_last_month, d.maintenance_score
-            ORDER BY vuln_count DESC, avg_cvss DESC
+            # Parameterized query to prevent SQL injection
+            query = """
+                SELECT
+                    d.dependency_name,
+                    d.version,
+                    COUNT(v.vulnerability_id) as vuln_count,
+                    AVG(v.cvss_score) as avg_cvss,
+                    MAX(v.publication_date) as latest_vuln,
+                    d.download_count_last_month,
+                    d.maintenance_score
+                FROM `{self.project}.{self.dataset}.dependencies` d
+                LEFT JOIN `{self.project}.{self.dataset}.vulnerabilities` v
+                    ON d.dependency_name = v.package_name
+                WHERE d.dependency_name IN UNNEST(@dependencies)
+                GROUP BY d.dependency_name, d.version, d.download_count_last_month, d.maintenance_score
+                ORDER BY vuln_count DESC, avg_cvss DESC
             """
-
-            query_job = self.client.query(query)
+            job_config = bigquery.QueryJobConfig(
+                query_parameters=[
+                    bigquery.ArrayQueryParameter("dependencies", "STRING", dependencies)
+                ]
+            )
+            query_job = self.client.query(query, job_config=job_config)
             results = []
 
             for row in query_job:
@@ -188,27 +195,31 @@ class BigQueryTool:
 
     def query_security_patterns(self, code_patterns: list[str]) -> dict[str, Any]:
         """Query for known insecure code patterns."""
-        if not self.client:
+        if not self.client or bigquery is None:
             return {"error": "BigQuery client not available", "patterns": [], "total_patterns": 0}
 
         if not code_patterns:
             return {"patterns": [], "total_patterns": 0}
 
         try:
-            pattern_list = "', '".join(code_patterns)
-            query = f"""
-            SELECT
-                pattern_name,
-                description,
-                severity_level,
-                mitigation_advice,
-                detection_count_last_30_days
-            FROM `{self.project}.{self.dataset}.security_patterns`
-            WHERE pattern_name IN ('{pattern_list}')
-            ORDER BY severity_level DESC
+            # Parameterized query to prevent SQL injection
+            query = """
+                SELECT
+                    pattern_name,
+                    description,
+                    severity_level,
+                    mitigation_advice,
+                    detection_count_last_30_days
+                FROM `{self.project}.{self.dataset}.security_patterns`
+                WHERE pattern_name IN UNNEST(@patterns)
+                ORDER BY severity_level DESC
             """
-
-            query_job = self.client.query(query)
+            job_config = bigquery.QueryJobConfig(
+                query_parameters=[
+                    bigquery.ArrayQueryParameter("patterns", "STRING", code_patterns)
+                ]
+            )
+            query_job = self.client.query(query, job_config=job_config)
             results = []
 
             for row in query_job:
@@ -245,40 +256,40 @@ class BigQueryTool:
 
     def _generate_mock_vulnerability_data(self, packages: list[str]) -> list[dict[str, Any]]:
         """Generate mock vulnerability data for demo purposes."""
-        import random
+        import random  # nosec B404
         from datetime import datetime
         from datetime import timedelta
 
         results = []
         for package in packages:
-            vuln_count = random.randint(0, 10)
+            vuln_count = random.randint(0, 10)  # nosec B311
             if vuln_count > 0:
                 results.append({
                     "package": package,
                     "vulnerability_count": vuln_count,
-                    "avg_severity": round(random.uniform(3.0, 9.5), 1),
-                    "latest_vuln_date": (datetime.now() - timedelta(days=random.randint(1, 365))).isoformat()
+                    "avg_severity": round(random.uniform(3.0, 9.5), 1),  # nosec B311
+                    "latest_vuln_date": (datetime.now() - timedelta(days=random.randint(1, 365))).isoformat()  # nosec B311
                 })
         return results
 
     def _generate_mock_dependency_risks(self, dependencies: list[str]) -> list[dict[str, Any]]:
         """Generate mock dependency risk data for demo purposes."""
-        import random
+        import random  # nosec B404
 
         results = []
         for dep in dependencies[:10]:  # Limit to 10 for demo
-            vuln_count = random.randint(0, 5)
-            avg_cvss = round(random.uniform(0.0, 9.0), 1) if vuln_count > 0 else 0.0
-            maintenance_score = round(random.uniform(0.3, 1.0), 2)
+            vuln_count = random.randint(0, 5)  # nosec B311
+            avg_cvss = round(random.uniform(0.0, 9.0), 1) if vuln_count > 0 else 0.0  # nosec B311
+            maintenance_score = round(random.uniform(0.3, 1.0), 2)  # nosec B311
             risk_score = self._calculate_risk_score(vuln_count, avg_cvss, maintenance_score)
 
             results.append({
                 "dependency": dep,
-                "version": f"{random.randint(1, 5)}.{random.randint(0, 20)}.{random.randint(0, 10)}",
+                "version": f"{random.randint(1, 5)}.{random.randint(0, 20)}.{random.randint(0, 10)}",  # nosec B311
                 "vulnerability_count": vuln_count,
                 "avg_cvss_score": avg_cvss,
                 "latest_vulnerability": None,
-                "download_count": random.randint(1000, 1000000),
+                "download_count": random.randint(1000, 1000000),  # nosec B311
                 "maintenance_score": maintenance_score,
                 "calculated_risk_score": risk_score,
                 "risk_level": self._categorize_risk(risk_score)
@@ -287,7 +298,7 @@ class BigQueryTool:
 
     def _generate_mock_security_patterns(self, patterns: list[str]) -> list[dict[str, Any]]:
         """Generate mock security pattern data for demo purposes."""
-        import random
+        import random  # nosec B404
 
         pattern_descriptions = {
             "hardcoded_password": "Password or secret key hardcoded in source code",
@@ -303,8 +314,8 @@ class BigQueryTool:
                 results.append({
                     "pattern": pattern,
                     "description": pattern_descriptions[pattern],
-                    "severity": random.choice(["CRITICAL", "HIGH", "MEDIUM"]),
+                    "severity": random.choice(["CRITICAL", "HIGH", "MEDIUM"]),  # nosec B311
                     "mitigation": "Review and fix the security issue according to best practices",
-                    "detection_count": random.randint(10, 1000)
+                    "detection_count": random.randint(10, 1000)  # nosec B311
                 })
         return results

@@ -63,5 +63,5 @@ class PerformanceAgent(Agent):
                     })
             except Exception:
                 # Skip files with parse errors
-                continue
+                continue  # nosec B112
         return {"count": len(issues), "issues": issues}

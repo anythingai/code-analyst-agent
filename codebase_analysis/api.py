@@ -155,4 +155,4 @@ def download_report(filename: str):  # pragma: no cover
 
 
 if __name__ == "__main__":  # pragma: no cover
-    app.run(host="0.0.0.0", port=8000)
+    app.run(host="0.0.0.0", port=8000)  # nosec B104

@@ -70,7 +70,7 @@ class SecurityAgent(Agent):
                         # Get the top-level package name
                         dependencies.add(dep.split('.')[0])
             except Exception:
-                continue
+                continue  # nosec B112
         return list(dependencies)
 
     def run(self) -> dict[str, Any]:

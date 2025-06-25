@@ -141,3 +141,9 @@ Provide a comprehensive but concise analysis."""
                         "analyzed_files": 0,
                         "error": str(e)
                     }
+        return {
+            "gemini_summary": "Gemini analysis failed due to an unexpected error.",
+            "file_count": len(files),
+            "analyzed_files": 0,
+            "error": "Max retries reached without success."
+        }
