@@ -5,17 +5,27 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "codebase-analysis"
 version = "0.1.0"
-description = "Multi-agent codebase analysis tool leveraging Gemini 2.5 Pro and Google ADK"
+description = "Production-ready multi-agent codebase analysis tool leveraging Gemini 2.5 Pro and Google Cloud Platform"
 authors = [
-  { name="Your Name", email="you@example.com" }
+  { name="Your Organization", email="contact@your-org.com" }
 ]
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "Apache-2.0"}
+keywords = ["code-analysis", "security", "performance", "ai", "gemini", "bigquery"]
 classifiers = [
-  "Programming Language :: Python :: 3",
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
   "License :: OSI Approved :: Apache Software License",
   "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Security",
+  "Topic :: System :: Monitoring",
 ]
 dependencies = [
   "click>=8.1",
@@ -24,6 +34,7 @@ dependencies = [
   "GitPython>=3.1",
   "requests>=2.28",
   "google-cloud-aiplatform>=1.38",
+  "google-cloud-bigquery>=3.10",
   "google-auth>=2.17",
   "networkx>=3.1",
   "python-dotenv>=1.0",
@@ -33,6 +44,7 @@ dependencies = [
   "fpdf2>=2.7",
   "python-docx>=1.1.0",
   "google-generativeai>=0.4.0",
+  "google-adk>=1.4",
 ]
 
 [tool.setuptools]
@@ -41,16 +53,178 @@ include-package-data = true
 [project.optional-dependencies]
 dev = [
   "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "pytest-mock>=3.10",
   "ruff>=0.5.3",
+  "black>=23.0",
+  "mypy>=1.5",
+  "pre-commit>=3.0",
+  "bandit>=1.7",
+  "safety>=2.3",
   "flask-cors>=4.0",
   "python-json-logger>=2.0",
 ]
 
-report = []
+bigquery = [
+  "google-cloud-bigquery>=3.10",
+  "google-cloud-storage>=2.10",
+]
+
+monitoring = [
+  "prometheus-client>=0.17",
+  "opentelemetry-api>=1.20",
+  "opentelemetry-sdk>=1.20",
+  "opentelemetry-exporter-gcp-monitoring>=1.5",
+]
+
+all = [
+  "codebase-analysis[dev,bigquery,monitoring]"
+]
 
 [project.scripts]
 codebase-analyze = "codebase_analysis.cli:cli"
 
+[project.urls]
+Homepage = "https://github.com/your-org/codebase-analysis"
+Documentation = "https://github.com/your-org/codebase-analysis#readme"
+Repository = "https://github.com/your-org/codebase-analysis.git"
+"Bug Tracker" = "https://github.com/your-org/codebase-analysis/issues"
+Changelog = "https://github.com/your-org/codebase-analysis/blob/main/CHANGELOG.md"
+
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["codebase_analysis*"] 
+include = ["codebase_analysis*"]
+
+[tool.setuptools.package-data]
+"codebase_analysis" = ["static/*", "templates/*", "report/templates/*"]
+
+# Development tool configurations
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+  "--strict-markers",
+  "--strict-config",
+  "--verbose",
+  "-ra",
+  "--cov=codebase_analysis",
+  "--cov-branch",
+  "--cov-report=term-missing",
+  "--cov-report=html",
+  "--cov-report=xml",
+]
+markers = [
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+  "integration: marks tests as integration tests",
+  "unit: marks tests as unit tests",
+]
+filterwarnings = [
+  "error",
+  "ignore::UserWarning",
+  "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["codebase_analysis"]
+omit = [
+  "*/tests/*",
+  "*/test_*",
+  "*/__pycache__/*",
+  "*/venv/*",
+  "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "if self.debug:",
+  "if settings.DEBUG",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if 0:",
+  "if __name__ .__main__.:",
+  "class .*\bProtocol\\):",
+  "@(abc\\.)?abstractmethod",
+]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "UP",  # pyupgrade
+  "ARG", # flake8-unused-arguments
+  "SIM", # flake8-simplify
+  "TCH", # flake8-type-checking
+]
+ignore = [
+  "E501",  # line too long, handled by black
+  "B008",  # do not perform function calls in argument defaults
+  "B905",  # zip without explicit strict parameter
+]
+unfixable = [
+  "F841",  # Remove unused variables
+]
+
+[tool.ruff.per-file-ignores]
+"tests/**/*" = ["S101", "ARG", "FBT"]
+"__init__.py" = ["F401"]
+
+[tool.ruff.isort]
+known-first-party = ["codebase_analysis"]
+force-single-line = true
+
+[tool.black]
+target-version = ['py39']
+line-length = 100
+skip-string-normalization = true
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.9"
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+  "google.*",
+  "flask_limiter.*",
+  "flask_cors.*",
+  "git.*",
+  "fpdf.*",
+  "docx.*",
+  "pytest.*",
+]
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "build", "dist"]
+skips = ["B101", "B601"] 

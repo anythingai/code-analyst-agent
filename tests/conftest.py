@@ -16,4 +16,4 @@ def _patch_gemini(monkeypatch):
     monkeypatch.setenv("GOOGLE_API_KEY", "dummy-key-for-tests")
 
     # Prevent any accidental remote calls during unit-tests.
-    monkeypatch.setattr(CodeUnderstandingTool, "analyze_code", lambda self, files: {}) 
+    monkeypatch.setattr(CodeUnderstandingTool, "analyze_code", lambda self, files: {})

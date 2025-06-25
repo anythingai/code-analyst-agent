@@ -11,4 +11,4 @@ def test_performance_agent_large_file(tmp_path):
     agent = PerformanceAgent(Path(tmp_path))
     res = agent.run()
     assert res["count"] == 1
-    assert any(issue["issue"] == "Large file" for issue in res["issues"]) 
+    assert any(issue["issue"] == "Large file" for issue in res["issues"])

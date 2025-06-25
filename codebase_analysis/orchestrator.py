@@ -1,12 +1,17 @@
 """Orchestrator Agent — coordinates sub-agents and merges their outputs."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Dict, List, Type
+from dataclasses import dataclass
+from dataclasses import field
+from typing import TYPE_CHECKING
+from typing import Any
 
-from .agents.base import Agent
 from .report.generator import ReportGenerator
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from .agents.base import Agent
 
 
 @dataclass
@@ -14,14 +19,14 @@ class Orchestrator:
     """Main orchestrator handling the full analysis workflow."""
 
     repo_path: Path
-    agents: List[Agent] = field(default_factory=list)
+    agents: list[Agent] = field(default_factory=list)
 
-    def register_agent(self, agent_cls: Type[Agent], **kwargs: Any) -> None:
+    def register_agent(self, agent_cls: type[Agent], **kwargs: Any) -> None:
         """Instantiate and register an agent class."""
         agent = agent_cls(self.repo_path, **kwargs)
         self.agents.append(agent)
 
-    def run(self, output_path: Path, formats: List[str] | None = None) -> Dict[str, Any]:
+    def run(self, output_path: Path, formats: list[str] | None = None) -> dict[str, Any]:
         """Run all registered agents and consolidate results into a report.
 
         Parameters
@@ -32,7 +37,7 @@ class Orchestrator:
             Report formats to generate, forwarded to ``ReportGenerator``.
         """
 
-        results: Dict[str, Any] = {}
+        results: dict[str, Any] = {}
         for agent in self.agents:
             results[agent.name] = agent.run()
 
@@ -40,4 +45,4 @@ class Orchestrator:
         generator = ReportGenerator()
         generator.generate(output_path, results, formats=formats)
 
-        return results 
+        return results

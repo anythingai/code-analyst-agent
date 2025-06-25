@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Dict, List
 
 import requests
 
@@ -17,7 +16,7 @@ class CVEChecker:
     def __init__(self, api_key: str | None = None):
         self.api_key = api_key or os.getenv("NVD_API_KEY")
 
-    def search(self, keyword: str, max_results: int = 10) -> List[Dict[str, str]]:
+    def search(self, keyword: str, max_results: int = 10) -> list[dict[str, str]]:
         """Search NVD for CVEs containing the given keyword."""
         if not self.api_key:
             raise RuntimeError(
@@ -34,9 +33,9 @@ class CVEChecker:
             r.raise_for_status()
             data = r.json()
         except Exception as exc:  # pragma: no cover
-            raise RuntimeError(f"CVE API request failed: {exc}")
+            raise RuntimeError(f"CVE API request failed: {exc}") from exc
 
-        results: List[Dict[str, str]] = []
+        results: list[dict[str, str]] = []
         for item in data.get("vulnerabilities", []):
             cve = item.get("cve")
             if not cve:
@@ -45,4 +44,4 @@ class CVEChecker:
                 "id": cve.get("id"),
                 "summary": cve.get("descriptions", [{}])[0].get("value", ""),
             })
-        return results 
+        return results

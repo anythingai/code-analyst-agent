@@ -3,8 +3,11 @@ from __future__ import annotations
 
 import abc
 import logging
-from pathlib import Path
-from typing import Any, Dict
+from typing import TYPE_CHECKING
+from typing import Any
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class Agent(abc.ABC):
@@ -21,5 +24,5 @@ class Agent(abc.ABC):
         """Human-readable agent name."""
 
     @abc.abstractmethod
-    def run(self) -> Dict[str, Any]:
-        """Execute analysis and return results as a dictionary.""" 
+    def run(self) -> dict[str, Any]:
+        """Execute analysis and return results as a dictionary."""

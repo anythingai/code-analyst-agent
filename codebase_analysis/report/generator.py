@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment
+from jinja2 import FileSystemLoader
+from jinja2 import select_autoescape
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 
@@ -19,12 +21,12 @@ env = Environment(
 class ReportGenerator:
     """Generates analysis reports in multiple formats."""
 
-    def _render_html(self, data: Dict[str, Any]) -> str:
+    def _render_html(self, data: dict[str, Any]) -> str:
         template = env.get_template("report.html")
         return template.render(results=data)
 
     # ---------------------------- public API ---------------------------- #
-    def generate(self, base_path: Path, results: Dict[str, Any], formats: list[str] | None = None) -> list[Path]:
+    def generate(self, base_path: Path, results: dict[str, Any], formats: list[str] | None = None) -> list[Path]:
         """Generate report files.
 
         Parameters
@@ -157,7 +159,7 @@ class ReportGenerator:
         return written
 
     # -----------------------------------------------------------------
-    def _render_markdown_like(self, results: Dict[str, Any]) -> str:
+    def _render_markdown_like(self, results: dict[str, Any]) -> str:
         """Return a simple Markdown-style text for PDF fallback."""
         md_parts: list[str] = ["# Codebase Analysis Report\n"]
         for section, data in results.items():
@@ -177,4 +179,4 @@ class ReportGenerator:
         while start < len(line):
             chunks.append(line[start : start + width])
             start += width
-        return chunks 
+        return chunks

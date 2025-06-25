@@ -14,4 +14,4 @@ def test_security_agent_detects_insecure_import(tmp_path, monkeypatch):
     agent = SecurityAgent(Path(tmp_path))
     res = agent.run()
     assert res["count"] == 1
-    assert any(issue["issue"].startswith("Insecure import") for issue in res["issues"]) 
+    assert any(issue["issue"].startswith("Insecure import") for issue in res["issues"])

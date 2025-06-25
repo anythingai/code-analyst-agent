@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: codebase-analysis
+  labels:
+    app: codebase-analysis
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: codebase-analysis
+  template:
+    metadata:
+      labels:
+        app: codebase-analysis
+    spec:
+      containers:
+      - name: codebase-analysis
+        image: gcr.io/PROJECT_ID/codebase-analysis:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: GOOGLE_CLOUD_PROJECT
+          value: "PROJECT_ID"
+        - name: LOG_FORMAT
+          value: "json"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: REPORT_DIR
+          value: "/mnt/reports"
+        - name: RATELIMIT_STORAGE_URL
+          value: "redis://redis-service:6379/0"
+        envFrom:
+        - secretRef:
+            name: codebase-analysis-secrets
+        volumeMounts:
+        - name: reports-volume
+          mountPath: /mnt/reports
+        - name: service-account
+          mountPath: /var/secrets/google
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+      volumes:
+      - name: reports-volume
+        persistentVolumeClaim:
+          claimName: reports-pvc
+      - name: service-account
+        secret:
+          secretName: gcp-service-account
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: codebase-analysis-service
+spec:
+  selector:
+    app: codebase-analysis
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: reports-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: codebase-analysis-secrets
+type: Opaque
+data:
+  GOOGLE_API_KEY: UkVQTEFDRQ==
+  NVD_API_KEY: UkVQTEFDRQ==
+  SECRET_KEY: UkVQTEFDRQ==
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  selector:
+    app: redis
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379 

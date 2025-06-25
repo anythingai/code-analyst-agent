@@ -1,0 +1,83 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: codebase-analysis
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/execution-environment: gen2
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/cpu-throttling: "false"
+        run.googleapis.com/memory: "2Gi"
+        run.googleapis.com/cpu: "2"
+        run.googleapis.com/max-scale: "10"
+        run.googleapis.com/min-scale: "1"
+        run.googleapis.com/timeout: "300"
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+      - name: codebase-analysis
+        image: gcr.io/PROJECT_ID/codebase-analysis:latest
+        ports:
+        - name: http1
+          containerPort: 8000
+        env:
+        - name: GOOGLE_CLOUD_PROJECT
+          value: "PROJECT_ID"
+        - name: LOG_FORMAT
+          value: "json"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: REPORT_DIR
+          value: "/tmp/reports"
+        - name: FLASK_ENV
+          value: "production"
+        - name: GUNICORN_WORKERS
+          value: "4"
+        - name: GUNICORN_THREADS
+          value: "2"
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: codebase-analysis-secrets
+              key: GOOGLE_API_KEY
+        - name: NVD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: codebase-analysis-secrets
+              key: NVD_API_KEY
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: codebase-analysis-secrets
+              key: SECRET_KEY
+        resources:
+          limits:
+            cpu: "2"
+            memory: "2Gi"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 60
+          timeoutSeconds: 10
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 10
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 1Gi
+      serviceAccountName: codebase-analysis-service-account

@@ -1,14 +1,23 @@
 """Flask API wrapper to expose /analyze endpoint."""
 from __future__ import annotations
 
+import os
 import tempfile
+import uuid
 from pathlib import Path
-from typing import Dict
 
-from flask import Flask, jsonify, request, send_file, abort, Response
+from flask import Flask
+from flask import Response
+from flask import abort
+from flask import jsonify
+from flask import request
+from flask import send_file
 from git import Repo
 
-from .agents import ParserAgent, PerformanceAgent, SecurityAgent
+from .agents import ParserAgent
+from .agents import PerformanceAgent
+from .agents import SecurityAgent
+from .logging_utils import setup_logging
 from .orchestrator import Orchestrator
 from .webui import web_bp
 
@@ -16,11 +25,6 @@ try:
     from flask_cors import CORS  # type: ignore
 except ImportError:
     CORS = None  # pragma: no cover
-
-import os
-import uuid
-
-from .logging_utils import setup_logging
 
 # Optional rate-limiting support
 try:
@@ -75,7 +79,7 @@ def healthz():  # pragma: no cover
     return "ok", 200
 
 @app.route("/analyze", methods=["POST"])
-def analyze() -> "tuple[str, int] | tuple[dict[str, str], int]":
+def analyze():
     """Primary analysis endpoint.
 
     Accepts JSON payload: {"repo_url": "...", "output": "basename", "formats": [..]}
@@ -84,7 +88,7 @@ def analyze() -> "tuple[str, int] | tuple[dict[str, str], int]":
     clashes between concurrent requests.
     """
 
-    data: Dict[str, str] = request.get_json(force=True)
+    data: dict[str, str] = request.get_json(force=True)
     repo_url = data.get("repo_url")
     if not repo_url:
         return {"error": "repo_url is required"}, 400
@@ -151,4 +155,4 @@ def download_report(filename: str):  # pragma: no cover
 
 
 if __name__ == "__main__":  # pragma: no cover
-    app.run(host="0.0.0.0", port=8000) 
+    app.run(host="0.0.0.0", port=8000)

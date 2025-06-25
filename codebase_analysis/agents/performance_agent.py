@@ -2,10 +2,13 @@
 from __future__ import annotations
 
 import ast
-from pathlib import Path
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING
+from typing import Any
 
 from .base import Agent
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class _NestedLoopVisitor(ast.NodeVisitor):
@@ -27,7 +30,7 @@ class PerformanceAgent(Agent):
     def name(self) -> str:  # noqa: D401
         return "performance_issues"
 
-    def _collect_py_files(self) -> List[Path]:
+    def _collect_py_files(self) -> list[Path]:
         venv_path = self.repo_path / ".venv"
         return [
             p
@@ -35,9 +38,9 @@ class PerformanceAgent(Agent):
             if p.is_file() and not p.resolve().is_relative_to(venv_path.resolve())
         ]
 
-    def run(self) -> Dict[str, Any]:
+    def run(self) -> dict[str, Any]:
         self.logger.info("[bold yellow]PERFORMANCE[/bold yellow] Detecting bottlenecks...")
-        issues: List[Dict[str, Any]] = []
+        issues: list[dict[str, Any]] = []
         for file in self._collect_py_files():
             text = file.read_text(errors="ignore")
             lines = len(text.splitlines())
@@ -61,4 +64,4 @@ class PerformanceAgent(Agent):
             except Exception:
                 # Skip files with parse errors
                 continue
-        return {"count": len(issues), "issues": issues} 
+        return {"count": len(issues), "issues": issues}

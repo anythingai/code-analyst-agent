@@ -43,4 +43,4 @@ def setup_logging(level: str | int | None = None) -> None:
             format="%(message)s",
             datefmt="[%X]",
             handlers=[RichHandler(markup=True, show_path=False, show_level=False, show_time=False)],
-        ) 
+        )

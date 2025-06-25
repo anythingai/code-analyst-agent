@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 import ast
-from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import TYPE_CHECKING
+from typing import Any
 
 import networkx as nx
 
-from .base import Agent
 from ..tools.gemini import CodeUnderstandingTool
+from .base import Agent
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class ParserAgent(Agent):
@@ -18,7 +21,7 @@ class ParserAgent(Agent):
     def name(self) -> str:  # noqa: D401
         return "parser_results"
 
-    def _collect_py_files(self) -> List[Path]:
+    def _collect_py_files(self) -> list[Path]:
         venv_path = self.repo_path / ".venv"
         return [
             p
@@ -26,7 +29,7 @@ class ParserAgent(Agent):
             if p.is_file() and not p.resolve().is_relative_to(venv_path.resolve())
         ]
 
-    def _build_call_graph(self, files: List[Path]) -> Tuple[nx.DiGraph, int]:
+    def _build_call_graph(self, files: list[Path]) -> tuple[nx.DiGraph, int]:
         graph: nx.DiGraph = nx.DiGraph()
         total_functions = 0
         for file in files:
@@ -45,7 +48,7 @@ class ParserAgent(Agent):
                             graph.add_edge(func_name, child.func.id)
         return graph, total_functions
 
-    def run(self) -> Dict[str, Any]:
+    def run(self) -> dict[str, Any]:
         py_files = self._collect_py_files()
         self.logger.info(f"[bold]PARSER[/bold] Parsing {len(py_files):,} files...")
         graph, total_functions = self._build_call_graph(py_files)
@@ -59,4 +62,4 @@ class ParserAgent(Agent):
             "call_graph_nodes": graph.number_of_nodes(),
             "call_graph_edges": graph.number_of_edges(),
             **gemini_summary,
-        } 
+        }

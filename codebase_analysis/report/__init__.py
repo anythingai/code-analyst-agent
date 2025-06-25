@@ -1,1 +1,1 @@
-"""Reporting utilities (JSON + HTML).""" 
+"""Reporting utilities (JSON + HTML)."""
