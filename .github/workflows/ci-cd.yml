@@ -12,6 +12,10 @@ env:
   REGISTRY: gcr.io
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   test:
     name: Run Tests
@@ -61,8 +65,6 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -184,9 +186,6 @@ jobs:
   security-monitoring:
     name: Security Monitoring
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
