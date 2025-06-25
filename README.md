@@ -56,6 +56,7 @@ graph TB
 **[View Full Architecture Documentation →](docs/architecture.md)**
 
 Key components:
+
 * **Orchestrator**: Coordinates multi-agent workflow
 * **Parser Agent**: AST analysis and code structure mapping  
 * **Security Agent**: CVE detection and vulnerability scanning
