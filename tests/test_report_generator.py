@@ -192,7 +192,5 @@ class TestReportGenerator:
         generator = ReportGenerator()
         output_path = tmp_path / "test_report"
 
-        # Should handle gracefully
-        generator.generate(output_path, sample_results, formats=["invalid_format"])
-
-        # Should not crash, but may not generate anything for invalid format
+        with pytest.raises(ValueError, match="Unsupported report format"):
+            generator.generate(output_path, sample_results, formats=["invalid_format"])

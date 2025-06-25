@@ -53,8 +53,6 @@ graph TB
     PFA --> RG
 ```
 
-**[View Full Architecture Documentation →](docs/architecture.md)**
-
 Key components:
 
 * **Orchestrator**: Coordinates multi-agent workflow
@@ -71,7 +69,7 @@ Key components:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/codebase-analysis.git
+git clone <your-repository-url>
 cd codebase-analysis
 
 # Create virtual environment
@@ -79,7 +77,7 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
 # Install in development mode
-pip install -e .[dev]
+pip install -e ".[dev]"
 ```
 
 ### 2. Configuration
@@ -98,7 +96,7 @@ cp .env.example .env
 
 ```bash
 # Analyze a repository
-codebase-analyze --repo https://github.com/user/repo --output analysis_report --formats json,html,pdf
+codebase-analyze --repo https://github.com/some/repo --output analysis_report --formats json,html,pdf
 
 # Local repository
 codebase-analyze --repo ./my-project --output local_analysis --formats json,html,md
@@ -253,7 +251,7 @@ Analyze a repository and generate reports.
 
 ```json
 {
-  "repo_url": "https://github.com/user/repo",
+  "repo_url": "https://github.com/some/repo",
   "output": "analysis",
   "formats": ["json", "html", "pdf"]
 }
@@ -296,12 +294,12 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## 🆘 Support
 
-* **Documentation**: See the `/docs` folder for detailed guides
-* **Issues**: Report bugs on [GitHub Issues](https://github.com/your-org/codebase-analysis/issues)
-* **Discussions**: Join our [GitHub Discussions](https://github.com/your-org/codebase-analysis/discussions)
+* **Documentation**: See the `docs/` folder for detailed guides
+* **Issues**: Report bugs on GitHub Issues
+* **Discussions**: Join our GitHub Discussions
 
 ---
 
-**Enterprise Support**: For enterprise deployment, custom integrations, or commercial support, contact us at <support@your-company.com>
+**Enterprise Support**: For enterprise deployment, custom integrations, or commercial support, contact us at <support@example.com>
 
 Built with ❤️ using Gemini 2.5 Pro and Google Cloud Platform

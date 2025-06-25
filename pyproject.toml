@@ -153,6 +153,8 @@ exclude_lines = [
 [tool.ruff]
 target-version = "py39"
 line-length = 100
+
+[tool.lint]
 select = [
   "E",   # pycodestyle errors
   "W",   # pycodestyle warnings
@@ -164,21 +166,21 @@ select = [
   "ARG", # flake8-unused-arguments
   "SIM", # flake8-simplify
   "TCH", # flake8-type-checking
+  "B905",  # zip without explicit strict parameter
 ]
 ignore = [
   "E501",  # line too long, handled by black
   "B008",  # do not perform function calls in argument defaults
-  "B905",  # zip without explicit strict parameter
 ]
 unfixable = [
   "F841",  # Remove unused variables
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.lint.per-file-ignores]
 "tests/**/*" = ["S101", "ARG", "FBT"]
 "__init__.py" = ["F401"]
 
-[tool.ruff.isort]
+[tool.lint.isort]
 known-first-party = ["codebase_analysis"]
 force-single-line = true
 

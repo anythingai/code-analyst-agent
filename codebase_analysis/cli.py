@@ -1,7 +1,6 @@
 """Command-line interface for the analysis tool."""
 from __future__ import annotations
 
-import logging
 import os
 import tempfile
 from pathlib import Path
@@ -35,7 +34,7 @@ def cli(repo_url: str, output_path: str, formats: str, clean: bool) -> None:  # 
         repo_path = Path(repo_url).resolve()
     else:
         tmp_dir = tempfile.TemporaryDirectory()
-        logging.info(f"[bold cyan]INFO[/bold cyan] Cloning {repo_url}...")
+        click.echo(f"Cloning {repo_url}...")
         Repo.clone_from(repo_url, tmp_dir.name)
         repo_path = Path(tmp_dir.name)
 
@@ -49,7 +48,7 @@ def cli(repo_url: str, output_path: str, formats: str, clean: bool) -> None:  # 
 
     fmt_list = [f.strip() for f in formats.split(',') if f.strip()]
     orchestrator.run(full_output_path, formats=fmt_list)
-    logging.info(f"[bold green]SUCCESS[/bold green] Reports generated at {full_output_path} with formats: {', '.join(fmt_list)}")
+    click.echo(f"Reports generated at {full_output_path} with formats: {', '.join(fmt_list)}")
 
     if clean and tmp_dir is not None:
         tmp_dir.cleanup()

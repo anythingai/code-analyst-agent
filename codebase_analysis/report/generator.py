@@ -20,6 +20,7 @@ env = Environment(
 
 class ReportGenerator:
     """Generates analysis reports in multiple formats."""
+    SUPPORTED_FORMATS = {"json", "html", "md", "pdf", "docx"}
 
     def _render_html(self, data: dict[str, Any]) -> str:
         template = env.get_template("report.html")
@@ -47,6 +48,14 @@ class ReportGenerator:
 
         if not formats:
             formats = ["json", "html"]
+
+        # Validate that all requested formats are supported
+        unsupported = set(formats) - self.SUPPORTED_FORMATS
+        if unsupported:
+            raise ValueError(
+                f"Unsupported report format(s): {', '.join(unsupported)}. "
+                f"Supported formats are: {', '.join(self.SUPPORTED_FORMATS)}"
+            )
 
         written: list[Path] = []
 
@@ -124,7 +133,7 @@ class ReportGenerator:
                 # Add each line of the Markdown-ish report to the PDF
                 for line in self._render_markdown_like(results).splitlines():
                     for chunk in self._wrap_line(line, width=80):
-                        pdf.multi_cell(0, 5, txt=chunk)
+                        pdf.multi_cell(0, 5, text=chunk)
 
                 pdf.output(str(pdf_path))
                 written.append(pdf_path)
@@ -147,7 +156,7 @@ class ReportGenerator:
                     document.add_paragraph(json.dumps(data, indent=2))
 
                 docx_path = base_path.with_suffix(".docx")
-                document.save(docx_path)
+                document.save(str(docx_path))
                 written.append(docx_path)
             except Exception as exc:  # pragma: no cover
                 import logging
