@@ -1,6 +1,8 @@
-# Code Analyst Agent &nbsp;![CI](https://github.com/anythingai/code-analyst-agent/actions/workflows/ci-cd.yml/badge.svg)
+# Code Analyst Agent
 
 A **production-ready** multi-agent system powered by **Gemini 2.5 Pro** for comprehensive analysis of large software codebases. Built with Google Cloud Platform integration, BigQuery analytics, and enterprise-grade security.
+
+![Code Analyst Agent Screenshot](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/003/620/233/datas/original.png)
 
 ---
 
@@ -292,14 +294,6 @@ Download generated report files.
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
-
-* **Documentation**: See the `docs/` folder for detailed guides
-* **Issues**: Report bugs on GitHub Issues
-* **Discussions**: Join our GitHub Discussions
-
 ---
 
-**Enterprise Support**: For enterprise deployment, custom integrations, or commercial support, contact us at <support@example.com>
-
-Built with ❤️ using Gemini 2.5 Pro and Google Cloud Platform
+Built with ❤️ using Gemini 2.5 Pro and Google ADK
